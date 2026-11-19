@@ -1,3 +1,7 @@
+> **Fork notice.** This is a fork of [3freet/BYD-Assistant-NG](https://github.com/3freet/BYD-Assistant-NG) (GPL-3.0) that adds
+> support for any OpenAI-compatible model (OpenAI, MiniMax, Groq, OpenRouter, LiteLLM, or self-hosted Ollama / llama.cpp / vLLM)
+> next to Gemini. See [docs/llm-providers.md](docs/llm-providers.md).
+
 # BYD Assistant NG
 
 **English** · [العربية](README.ar.md) · [Русский](README.ru.md) · [Polski](README.pl.md)

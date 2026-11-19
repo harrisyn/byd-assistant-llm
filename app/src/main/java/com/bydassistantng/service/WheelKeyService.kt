@@ -84,6 +84,7 @@ class WheelKeyService : AccessibilityService(), GreetingHost {
     @Inject lateinit var audioRecorder: AudioRecorder
     @Inject lateinit var conversationController: ConversationController
     @Inject lateinit var liveConversationController: LiveConversationController
+    @Inject lateinit var llmConfigRepository: com.bydassistantng.llm.LlmConfigRepository
     @Inject lateinit var ttsEngine: TextToSpeechEngine
     @Inject lateinit var earcons: Earcons
     @Inject lateinit var liveBroadcast: LiveBroadcast
@@ -430,7 +431,9 @@ class WheelKeyService : AccessibilityService(), GreetingHost {
                 return@launch
             }
 
-            val liveStarted = liveConversationController.start { status -> handleStatus(status) }
+            llmConfigRepository.importFileIfPresent()
+            val useGemini = llmConfigRepository.current().isGemini
+            val liveStarted = useGemini && liveConversationController.start { status -> handleStatus(status) }
             if (liveStarted) {
                 // The Live controller plays the listening tone itself (and the others).
                 banner.show(BannerMode.LISTENING)
@@ -439,7 +442,7 @@ class WheelKeyService : AccessibilityService(), GreetingHost {
 
             // Some failures have an answer the classic pipeline can't improve on — it needs the same
             // internet and key, and would first record 15 seconds of the user talking before saying so.
-            val failure = liveConversationController.lastStartFailure
+            val failure = if (useGemini) liveConversationController.lastStartFailure else StartFailure.NONE
             if (failure != StartFailure.OTHER && failure != StartFailure.NONE) {
                 AppLogger.log(TAG, "Live unavailable ($failure) — telling the user instead of falling back")
                 signalFailure(liveConversationController.lastStartMessage, offline = failure == StartFailure.NO_NETWORK)

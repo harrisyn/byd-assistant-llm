@@ -30,7 +30,10 @@ private const val INIT_TIMEOUT_MS = 5_000L
  * Gemini-native audio-output model for v1.
  */
 @Singleton
-class TextToSpeechEngine @Inject constructor(@ApplicationContext context: Context) {
+class TextToSpeechEngine @Inject constructor(
+    @ApplicationContext context: Context,
+    private val cloudSpeaker: com.bydassistantng.llm.CloudSpeaker,
+) {
     private val lock = Any()
 
     // Deliberately two separate flags: TextToSpeech's OnInitListener fires exactly once, ever —
@@ -83,6 +86,7 @@ class TextToSpeechEngine @Inject constructor(@ApplicationContext context: Contex
      * from whether the reply text itself contains Arabic-script or Cyrillic characters, since the reply's
      * language is only known once Gemini has already answered. */
     suspend fun speak(text: String, language: AssistantLanguage) {
+        if (cloudSpeaker.isEnabled()) { cloudSpeaker.speak(text); return }
         val resolvedInTime = withTimeoutOrNull(INIT_TIMEOUT_MS) { awaitReady() } != null
         if (!resolvedInTime) {
             AppLogger.logError(TAG, "TTS init hadn't resolved after ${INIT_TIMEOUT_MS}ms — giving up on: \"$text\"")
@@ -110,11 +114,12 @@ class TextToSpeechEngine @Inject constructor(@ApplicationContext context: Contex
      * one has none) never does, so a text answer is never heard there.
      */
     suspend fun canSpeak(): Boolean {
+        if (cloudSpeaker.isEnabled()) return true
         val resolved = withTimeoutOrNull(INIT_TIMEOUT_MS) { awaitReady() } != null
         return resolved && isReady
     }
 
-    fun stop() = tts.stop()
+    fun stop() { cloudSpeaker.stop(); tts.stop() }
 
     fun shutdown() = tts.shutdown()
 

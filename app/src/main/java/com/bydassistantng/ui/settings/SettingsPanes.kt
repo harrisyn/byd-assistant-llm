@@ -69,6 +69,8 @@ internal fun AssistantPane(viewModel: SettingsViewModel) {
     var showDialectChoice by remember { mutableStateOf(false) }
     var showVoiceChoice by remember { mutableStateOf(false) }
     var showApiKey by remember { mutableStateOf(false) }
+    var showLlm by remember { mutableStateOf(false) }
+    val llmConfig by viewModel.llmConfig.collectAsState()
 
     if (showLanguageChoice) {
         ChoiceDialog(
@@ -107,6 +109,13 @@ internal fun AssistantPane(viewModel: SettingsViewModel) {
             onDismiss = { showVoiceChoice = false },
         )
     }
+    if (showLlm) {
+        LlmProviderDialog(
+            initial = llmConfig,
+            onSave = { c, k, sk, tk -> viewModel.saveLlm(c, k, sk, tk) },
+            onDismiss = { showLlm = false },
+        )
+    }
     if (showApiKey) {
         ApiKeyDialog(
             hasKey = hasApiKey,
@@ -119,6 +128,14 @@ internal fun AssistantPane(viewModel: SettingsViewModel) {
 
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
         SettingsSection(stringResource(R.string.group_setup)) {
+            row {
+                SettingRow(
+                    title = "AI model",
+                    subtitle = if (llmConfig.isGemini) "Gemini (Live audio)" else "${llmConfig.model} @ ${llmConfig.baseUrl}",
+                    onClick = { showLlm = true },
+                    trailing = { SettingButton(label = stringResource(R.string.action_change), primary = false, onClick = { showLlm = true }) },
+                )
+            }
             row {
                 val open = {
                     viewModel.clearApiKeyMessage()

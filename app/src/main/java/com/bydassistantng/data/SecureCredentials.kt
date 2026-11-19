@@ -81,6 +81,43 @@ class SecureCredentials @Inject constructor(@ApplicationContext context: Context
         false
     }
 
+    /** Named secrets (extra provider keys), encrypted with the same Keystore key as the Gemini key. */
+    suspend fun getSecret(name: String): String? {
+        val prefs = dataStore.data.first()
+        val ct = prefs[stringPreferencesKey("secret_${name}_ct")] ?: return null
+        val iv = prefs[stringPreferencesKey("secret_${name}_iv")] ?: return null
+        return try {
+            val cipher = Cipher.getInstance(TRANSFORMATION)
+            cipher.init(Cipher.DECRYPT_MODE, getOrCreateSecretKey(), GCMParameterSpec(128, Base64.decode(iv, Base64.NO_WRAP)))
+            String(cipher.doFinal(Base64.decode(ct, Base64.NO_WRAP)), Charsets.UTF_8)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to decrypt secret $name", e)
+            null
+        }
+    }
+
+    suspend fun setSecret(name: String, value: String): Boolean = try {
+        if (value.isBlank()) {
+            dataStore.edit {
+                it.remove(stringPreferencesKey("secret_${name}_ct"))
+                it.remove(stringPreferencesKey("secret_${name}_iv"))
+            }
+        } else {
+            val cipher = Cipher.getInstance(TRANSFORMATION)
+            cipher.init(Cipher.ENCRYPT_MODE, getOrCreateSecretKey())
+            val ciphertext = cipher.doFinal(value.toByteArray(Charsets.UTF_8))
+            val iv = cipher.iv
+            dataStore.edit {
+                it[stringPreferencesKey("secret_${name}_ct")] = Base64.encodeToString(ciphertext, Base64.NO_WRAP)
+                it[stringPreferencesKey("secret_${name}_iv")] = Base64.encodeToString(iv, Base64.NO_WRAP)
+            }
+        }
+        true
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to save secret $name", e)
+        false
+    }
+
     suspend fun hasApiKey(): Boolean = !getApiKey().isNullOrBlank()
 
     suspend fun clearApiKey() {

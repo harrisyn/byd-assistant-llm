@@ -67,11 +67,15 @@ class ConversationController @Inject constructor(
     // The same instance the Live path uses, so there is only ever one helper process. It does
     // nothing (no ADB, no process) until a vehicle command is actually dispatched or warmed up.
     private val vehicleController: ShellHelperVehicleController,
+    private val llmConfig: com.bydassistantng.llm.LlmConfigRepository,
+    private val pipeline: com.bydassistantng.llm.PipelineConversationController,
     @ApplicationContext private val context: Context,
 ) {
     private val mutex = Mutex()
 
     suspend fun runTurn(audioFile: File, mimeType: String, onStatus: suspend (TurnStatus) -> Unit) {
+        llmConfig.importFileIfPresent()
+        if (!llmConfig.current().isGemini) return mutex.withLock { pipeline.runTurn(audioFile, onStatus) }
         val turnId = SystemClock.elapsedRealtime() % 100_000
         val turnStartMs = SystemClock.elapsedRealtime()
         AppLogger.log(TAG, "[turn $turnId] requesting mutex (audio=${audioFile.length()} bytes, mime=$mimeType)")

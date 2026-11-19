@@ -55,6 +55,7 @@ private const val KEY_CAPTURE_TIMEOUT_MS = 60_000L
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val secureCredentials: SecureCredentials,
+    private val llmConfigRepository: com.bydassistantng.llm.LlmConfigRepository,
     private val preferencesRepository: PreferencesRepository,
     private val memory: MemoryRepository,
     private val updateManager: UpdateManager,
@@ -76,6 +77,18 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun text(id: Int, vararg args: Any): String = AppLanguage.string(context, id, *args)
+
+    val llmConfig: StateFlow<com.bydassistantng.llm.LlmConfig> = llmConfigRepository.config
+        .stateIn(viewModelScope, SharingStarted.Eagerly, com.bydassistantng.llm.LlmConfig())
+
+    fun saveLlm(config: com.bydassistantng.llm.LlmConfig, llmKey: String, sttKey: String, ttsKey: String) {
+        viewModelScope.launch {
+            llmConfigRepository.save(config)
+            if (llmKey.isNotBlank()) llmConfigRepository.setLlmKey(llmKey)
+            if (sttKey.isNotBlank()) llmConfigRepository.setSttKey(sttKey)
+            if (ttsKey.isNotBlank()) llmConfigRepository.setTtsKey(ttsKey)
+        }
+    }
 
     val language: StateFlow<AssistantLanguage> = preferencesRepository.assistantLanguage
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AssistantLanguage.AUTO)
