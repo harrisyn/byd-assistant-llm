@@ -95,6 +95,8 @@ fun OnboardingScreen(onFinished: () -> Unit, viewModel: OnboardingViewModel = hi
     val appLanguage by viewModel.appLanguage.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
     var apiKey by remember { mutableStateOf("") }
+    val llmConfig by viewModel.llmConfig.collectAsState()
+    var showLlm by remember { mutableStateOf(false) }
 
     var micGranted by remember { mutableStateOf(isGranted(context, Manifest.permission.RECORD_AUDIO)) }
     var notificationsGranted by remember {
@@ -140,13 +142,21 @@ fun OnboardingScreen(onFinished: () -> Unit, viewModel: OnboardingViewModel = hi
     // Back is one step back, as in the rest of the app; from the first step it leaves.
     BackHandler(enabled = current > 0) { index = current - 1 }
 
-    val keyAdded = apiKey.isNotBlank()
+    val keyAdded = apiKey.isNotBlank() || !llmConfig.isGemini
     val canGoOn = when (step) {
         SetupStep.MICROPHONE -> micGranted
         SetupStep.KEY -> keyAdded
         else -> true
     }
     val canStart = micGranted && keyAdded
+
+    if (showLlm) {
+        com.bydassistantng.ui.settings.LlmProviderDialog(
+            initial = llmConfig,
+            onSave = { c, k, sk, tk -> viewModel.saveLlm(c, k, sk, tk) },
+            onDismiss = { showLlm = false },
+        )
+    }
 
     if (confirmCarVoiceOff) {
         AppAlertDialog(
@@ -297,6 +307,12 @@ fun OnboardingScreen(onFinished: () -> Unit, viewModel: OnboardingViewModel = hi
                                             modifier = Modifier.padding(top = 10.dp),
                                         )
                                         AiStudioKeyLink(modifier = Modifier.padding(top = 12.dp))
+                                        SettingButton(
+                                            label = if (llmConfig.isGemini) "Use another AI model instead (OpenAI, MiniMax, Ollama…)"
+                                            else "Using ${llmConfig.model} — change",
+                                            primary = !llmConfig.isGemini,
+                                            onClick = { showLlm = true },
+                                        )
                                         errorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp)) }
                                     }
                                 }

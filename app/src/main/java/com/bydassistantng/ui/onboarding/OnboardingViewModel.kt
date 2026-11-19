@@ -12,6 +12,8 @@ import com.bydassistantng.util.AppLanguageChoice
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -22,6 +24,7 @@ class OnboardingViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val secureCredentials: SecureCredentials,
     private val preferencesRepository: PreferencesRepository,
+    private val llmConfigRepository: com.bydassistantng.llm.LlmConfigRepository,
 ) : ViewModel() {
     private val _appLanguage = MutableStateFlow(AppLanguage.choice(context))
     val appLanguage: StateFlow<AppLanguageChoice> = _appLanguage.asStateFlow()
@@ -48,7 +51,28 @@ class OnboardingViewModel @Inject constructor(
         viewModelScope.launch { preferencesRepository.markAutoStartVisited() }
     }
 
+    val llmConfig: StateFlow<com.bydassistantng.llm.LlmConfig> = llmConfigRepository.config
+        .stateIn(viewModelScope, SharingStarted.Eagerly, com.bydassistantng.llm.LlmConfig())
+
+    fun saveLlm(config: com.bydassistantng.llm.LlmConfig, llmKey: String, sttKey: String, ttsKey: String) {
+        viewModelScope.launch {
+            llmConfigRepository.save(config)
+            if (llmKey.isNotBlank()) llmConfigRepository.setLlmKey(llmKey)
+            if (sttKey.isNotBlank()) llmConfigRepository.setSttKey(sttKey)
+            if (ttsKey.isNotBlank()) llmConfigRepository.setTtsKey(ttsKey)
+        }
+    }
+
     fun saveApiKeyAndFinish(apiKey: String, onFinished: () -> Unit) {
+        // Another model chosen: no Gemini key is needed to finish.
+        if (!llmConfig.value.isGemini) {
+            viewModelScope.launch {
+                if (apiKey.isNotBlank()) secureCredentials.setApiKey(apiKey.trim())
+                preferencesRepository.setOnboardingCompleted(true)
+                onFinished()
+            }
+            return
+        }
         if (apiKey.isBlank()) {
             _errorMessage.value = AppLanguage.string(context, R.string.onb_enter_key)
             return
