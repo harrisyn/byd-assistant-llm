@@ -91,6 +91,15 @@ class OpenAiCompatClient @Inject constructor() {
         return ChatReply(msg, text, calls)
     }
 
+    suspend fun listModels(base: String, key: String?): List<String> {
+        val bytes = exec(req("$base/models", key).get().build())
+        val root = Json.parseToJsonElement(String(bytes, Charsets.UTF_8)).jsonObject
+        val arr = (root["data"] ?: root["models"]) as? JsonArray ?: return emptyList()
+        return arr.mapNotNull { (it as? JsonObject)?.get("id")?.jsonPrimitive?.contentOrNull ?: (it as? JsonPrimitive)?.contentOrNull }
+            .filterNot { id -> listOf("embed", "whisper", "tts", "moderation", "dall-e", "image", "audio").any { id.contains(it, true) } }
+            .sorted()
+    }
+
     /** Speech to text. [file] is whatever the recorder produced (m4a/AAC); servers sniff the container. */
     suspend fun transcribe(base: String, key: String?, model: String, file: File, language: String?): String {
         val multipart = MultipartBody.Builder().setType(MultipartBody.FORM)

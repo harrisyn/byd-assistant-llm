@@ -81,6 +81,8 @@ class SettingsViewModel @Inject constructor(
     val llmConfig: StateFlow<com.bydassistantng.llm.LlmConfig> = llmConfigRepository.config
         .stateIn(viewModelScope, SharingStarted.Eagerly, com.bydassistantng.llm.LlmConfig())
 
+    suspend fun loadModels(base: String, key: String): List<String> = llmConfigRepository.listModels(base, key)
+
     fun saveLlm(config: com.bydassistantng.llm.LlmConfig, llmKey: String, sttKey: String, ttsKey: String) {
         viewModelScope.launch {
             llmConfigRepository.save(config)

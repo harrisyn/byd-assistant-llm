@@ -28,6 +28,7 @@ enum class LlmProvider { GEMINI, OPENAI_COMPAT }
  */
 data class LlmConfig(
     val provider: LlmProvider = LlmProvider.GEMINI,
+    val preset: String = "openai",
     val baseUrl: String = "https://api.openai.com/v1",
     val model: String = "gpt-4o-mini",
     val sttBaseUrl: String = "",
@@ -50,11 +51,13 @@ class LlmConfigRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val secrets: SecureCredentials,
     private val prefs: com.bydassistantng.data.PreferencesRepository,
+    private val client: OpenAiCompatClient,
 ) {
     private val dataStore = context.dataStore
 
     private object K {
         val PROVIDER = stringPreferencesKey("llm_provider")
+        val PRESET = stringPreferencesKey("llm_preset")
         val BASE = stringPreferencesKey("llm_base_url")
         val MODEL = stringPreferencesKey("llm_model")
         val STT_BASE = stringPreferencesKey("llm_stt_base_url")
@@ -68,6 +71,7 @@ class LlmConfigRepository @Inject constructor(
         val d = LlmConfig()
         LlmConfig(
             provider = p[K.PROVIDER]?.let { runCatching { LlmProvider.valueOf(it) }.getOrNull() } ?: d.provider,
+            preset = p[K.PRESET] ?: d.preset,
             baseUrl = p[K.BASE] ?: d.baseUrl,
             model = p[K.MODEL] ?: d.model,
             sttBaseUrl = p[K.STT_BASE] ?: d.sttBaseUrl,
@@ -83,6 +87,7 @@ class LlmConfigRepository @Inject constructor(
     suspend fun save(c: LlmConfig) {
         dataStore.edit {
             it[K.PROVIDER] = c.provider.name
+            it[K.PRESET] = c.preset
             it[K.BASE] = c.baseUrl.trim()
             it[K.MODEL] = c.model.trim()
             it[K.STT_BASE] = c.sttBaseUrl.trim()
@@ -92,6 +97,10 @@ class LlmConfigRepository @Inject constructor(
             it[K.TTS_VOICE] = c.ttsVoice.trim()
         }
     }
+
+    /** Model ids the provider offers (`GET {base}/models`); empty when unreachable or the key is rejected. */
+    suspend fun listModels(base: String, key: String): List<String> =
+        runCatching { client.listModels(base.trim().trimEnd('/'), key.ifBlank { llmKey() }) }.getOrDefault(emptyList())
 
     suspend fun llmKey(): String? = secrets.getSecret("llm")
     /** STT and TTS fall back to the chat key when they have none of their own. */
@@ -116,6 +125,7 @@ class LlmConfigRepository @Inject constructor(
             save(
                 LlmConfig(
                     provider = s("provider")?.let { runCatching { LlmProvider.valueOf(it.uppercase()) }.getOrNull() } ?: LlmProvider.OPENAI_COMPAT,
+                    preset = s("preset") ?: "custom",
                     baseUrl = s("baseUrl") ?: d.baseUrl,
                     model = s("model") ?: d.model,
                     sttBaseUrl = s("sttBaseUrl") ?: d.sttBaseUrl,

@@ -1,6 +1,14 @@
 # Other LLM providers
 
-Settings -> **AI model** switches between Gemini (Live audio, unchanged) and **OpenAI-compatible**.
+Settings -> **AI model** (and the setup wizard's key step) switches between Gemini (Live audio, unchanged) and a provider preset:
+**OpenAI, OpenRouter, Groq, MiniMax, Ollama / llama.cpp, Custom**. Pick one and the address, model and speech defaults are filled in;
+you add the key. **Load models** fetches the provider's live model list (`GET /models`) to pick from, so there is no typing of model
+names. **Advanced** shows every field. Providers without speech endpoints (OpenRouter, MiniMax, Ollama) borrow OpenAI's for
+speech-to-text and voice, which takes a second key; Groq does speech-to-text itself and borrows OpenAI's voice.
+
+Model names change often, so the preset model is only a starting point (`openrouter/auto` for OpenRouter). The MiniMax and Groq
+defaults come from public docs and third-party configs and have not been verified against live accounts.
+
 
 With an OpenAI-compatible model a voice turn is: recorded audio -> `/audio/transcriptions` -> `/chat/completions`
 (with the same navigation / app / media / car tools) -> text -> `/audio/speech` played through the car speakers.

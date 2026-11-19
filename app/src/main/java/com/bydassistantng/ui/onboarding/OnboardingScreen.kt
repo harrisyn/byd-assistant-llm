@@ -154,6 +154,7 @@ fun OnboardingScreen(onFinished: () -> Unit, viewModel: OnboardingViewModel = hi
         com.bydassistantng.ui.settings.LlmProviderDialog(
             initial = llmConfig,
             onSave = { c, k, sk, tk -> viewModel.saveLlm(c, k, sk, tk) },
+            onLoadModels = { b, k -> viewModel.loadModels(b, k) },
             onDismiss = { showLlm = false },
         )
     }

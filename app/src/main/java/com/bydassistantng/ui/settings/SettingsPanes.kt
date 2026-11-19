@@ -113,6 +113,7 @@ internal fun AssistantPane(viewModel: SettingsViewModel) {
         LlmProviderDialog(
             initial = llmConfig,
             onSave = { c, k, sk, tk -> viewModel.saveLlm(c, k, sk, tk) },
+            onLoadModels = { b, k -> viewModel.loadModels(b, k) },
             onDismiss = { showLlm = false },
         )
     }
