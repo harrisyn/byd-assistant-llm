@@ -86,9 +86,14 @@ class SettingsViewModel @Inject constructor(
     fun saveLlm(config: com.bydassistantng.llm.LlmConfig, llmKey: String, sttKey: String, ttsKey: String) {
         viewModelScope.launch {
             llmConfigRepository.save(config)
-            if (llmKey.isNotBlank()) llmConfigRepository.setLlmKey(llmKey)
-            if (sttKey.isNotBlank()) llmConfigRepository.setSttKey(sttKey)
-            if (ttsKey.isNotBlank()) llmConfigRepository.setTtsKey(ttsKey)
+            if (config.isGemini) {
+                if (llmKey.isNotBlank()) secureCredentials.setApiKey(llmKey.trim())
+            } else {
+                if (llmKey.isNotBlank()) llmConfigRepository.setLlmKey(llmKey)
+                if (sttKey.isNotBlank()) llmConfigRepository.setSttKey(sttKey)
+                if (ttsKey.isNotBlank()) llmConfigRepository.setTtsKey(ttsKey)
+            }
+            _hasApiKey.value = secureCredentials.hasApiKey()
         }
     }
 

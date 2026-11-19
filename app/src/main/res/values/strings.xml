@@ -81,21 +81,21 @@
     <string name="err_mic_off">Microphone permission is off — open BYD Assistant NG to grant it</string>
     <string name="err_finish_setup">Finish setting up BYD Assistant NG first</string>
     <string name="fail_no_network">No internet connection — check your network or phone hotspot</string>
-    <string name="fail_api_key">Gemini rejected the request — check the API key in Settings</string>
-    <string name="fail_busy">Gemini is busy or over its limit — try again in a moment</string>
+    <string name="fail_api_key">The AI provider rejected the request — check the API key in Settings</string>
+    <string name="fail_busy">The AI provider is busy or over its limit — try again in a moment</string>
     <string name="fail_generic">The voice connection failed — try again</string>
-    <string name="fail_no_key">Add your Gemini API key in the BYD Assistant NG settings</string>
+    <string name="fail_no_key">Choose an AI model and add its key in the BYD Assistant NG settings</string>
     <string name="err_mic_reopen">Could not reopen the microphone.</string>
     <string name="fail_lost">The voice connection was lost</string>
-    <string name="classic_no_key">No Gemini API key configured yet — add one in Settings.</string>
+    <string name="classic_no_key">No AI model set up yet — choose one in Settings.</string>
     <string name="classic_cant_read">Could not read the recording.</string>
-    <string name="classic_empty_reply">Empty reply from Gemini.</string>
-    <string name="classic_key_rejected">Gemini rejected the API key — check it in Settings.</string>
+    <string name="classic_empty_reply">Empty reply from the AI model.</string>
+    <string name="classic_key_rejected">The AI provider rejected the API key — check it in Settings.</string>
     <string name="classic_permission_denied">Google denied access for this key\'s project%1$s. Re-entering the key won\'t help — use a key from a different project or check AI Studio.</string>
-    <string name="classic_rate_limited">Gemini is rate-limiting requests — try again shortly.</string>
-    <string name="classic_network">Couldn\'t reach Gemini — check the connection.</string>
-    <string name="classic_provider_error">Gemini returned an error.</string>
-    <string name="classic_empty_response">Gemini returned an empty response.</string>
+    <string name="classic_rate_limited">The AI provider is rate-limiting requests — try again shortly.</string>
+    <string name="classic_network">Couldn\'t reach the AI provider — check the connection.</string>
+    <string name="classic_provider_error">The AI provider returned an error.</string>
+    <string name="classic_empty_response">The AI provider returned an empty response.</string>
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
@@ -135,7 +135,7 @@
     <string name="voice_hint">The assistant\'s voice. Takes effect on the next conversation — start one and listen.</string>
     <string name="web_search_title">Web search</string>
     <string name="web_search_desc">Lets the assistant look things up on Google — news, weather, scores, prices — when you ask something it can\'t answer itself. What you ask is sent to Google Search. Takes effect on the next conversation.</string>
-    <string name="web_search_note">Requires a paid Gemini plan (billing enabled on your API key). On a free key Google refuses it, and the assistant carries on without searching.</string>
+    <string name="web_search_note">Gemini only: requires a paid Gemini plan (billing enabled on your API key). On a free key Google refuses it, and the assistant carries on without searching.</string>
     <string name="wheel_title">Steering-wheel button</string>
     <string name="wheel_off">Off. Turn it on to start listening with the mic button on the wheel. It only watches that one button.</string>
     <string name="wheel_turning_on">Turning on…</string>
@@ -198,9 +198,9 @@
     <string name="autostart_confirmed">You\'ve opened the head unit\'s auto-start screen since the last update. If the steering-wheel button stops responding after the car sleeps or restarts, make sure this app\'s toggle is switched off there.</string>
     <string name="autostart_unconfirmed">Not confirmed. Open the head unit\'s auto-start screen and switch this app\'s toggle off, so the head unit can start the app by itself. Otherwise it can close the app when the car sleeps or restarts, which turns the steering-wheel button off until you open the app again.</string>
     <string name="autostart_open">Open auto-start settings</string>
-    <string name="api_key_title">Gemini API key</string>
+    <string name="api_key_title">AI model</string>
     <string name="api_key_saved">A key is currently saved.</string>
-    <string name="api_key_none">No key saved — the assistant can\'t talk to Gemini yet.</string>
+    <string name="api_key_none">No AI model set up — the assistant can\'t answer yet.</string>
     <string name="api_key_new_label">New API key</string>
     <string name="updates_title">Updates</string>
     <!-- Updates, advanced settings and the API-key link -->
@@ -336,7 +336,7 @@
     <string name="onb_api_label">API key</string>
     <string name="onb_api_note">From Google AI Studio. Stored encrypted on-device, never sent anywhere but Google\'s API.</string>
     <string name="onb_get_started">Get started</string>
-    <string name="onb_enter_key">Enter a Gemini API key.</string>
+    <string name="onb_enter_key">Choose an AI model and add its key.</string>
 
     <!-- Logs -->
     <string name="log_app_title">App log</string>
@@ -384,7 +384,7 @@
     <string name="greeting_test_button">Play it now</string>
     <string name="greeting_test_busy">The assistant is already in a conversation.</string>
     <string name="greeting_test_not_running">The wheel-button service is not running, so the assistant cannot start by itself. Turn it on in the car settings first.</string>
-    <string name="greeting_test_failed">The greeting could not start. Check the connection and the Gemini key.</string>
+    <string name="greeting_test_failed">The greeting could not start. Check the connection and the AI model settings.</string>
     <string name="group_control">Control</string>
     <string name="group_volume">Volume</string>
     <string name="group_language">Language</string>
@@ -396,7 +396,7 @@
     <string name="wheel_button_row">Microphone button</string>
     <string name="autostart_notice">Auto-start after reboot isn\'t confirmed. Open the head unit\'s auto-start screen and switch this app\'s toggle off, or the assistant can stop working after the car sleeps or restarts.</string>
     <string name="status_assistant">Key saved · %1$s</string>
-    <string name="status_no_key">No Gemini key yet</string>
+    <string name="status_no_key">No AI model yet</string>
     <string name="status_talk_over_on">Talk over it: on</string>
     <string name="status_talk_over_off">Talk over it: off</string>
     <string name="status_memories">%1$d remembered</string>
@@ -414,7 +414,7 @@
     <string name="setup_rail_title">Setup</string>
     <string name="setup_name_language">Language</string>
     <string name="setup_name_microphone">Microphone</string>
-    <string name="setup_name_key">Gemini key</string>
+    <string name="setup_name_key">AI model</string>
     <string name="setup_name_wheel">Wheel button</string>
     <string name="setup_name_autostart">Auto-start</string>
     <string name="setup_name_done">Ready</string>
@@ -429,7 +429,7 @@
     <string name="setup_state_done">Review</string>
     <string name="setup_step_of">Step %1$d of %2$d</string>
     <string name="setup_mic_title">Microphone</string>
-    <string name="setup_mic_body">The assistant listens through the car\'s microphone and sends your voice to Gemini to answer. It can\'t work without this.</string>
+    <string name="setup_mic_body">The assistant listens through the car\'s microphone and sends your voice to the AI model you choose. It can\'t work without this.</string>
     <string name="setup_mic_row">Microphone access</string>
     <string name="setup_mic_hint">Choose “While using the app” (or “Allow”). “Only this time” expires and the assistant silently stops working.</string>
     <string name="setup_mic_granted">Allowed. The assistant can hear you.</string>
@@ -437,8 +437,8 @@
     <string name="setup_notif_row">Notifications</string>
     <string name="setup_notif_desc">Lets the app tell you when a new version is available.</string>
     <string name="setup_notif_button">Allow</string>
-    <string name="setup_key_title">Gemini API key</string>
-    <string name="setup_key_body">Gemini is the AI that listens and answers. Paste a key from Google AI Studio.</string>
+    <string name="setup_key_title">AI model</string>
+    <string name="setup_key_body">Choose the AI that listens and answers: Gemini, OpenAI, OpenRouter, Groq, MiniMax, your own server… Pick one, add its key, and you are set.</string>
     <string name="setup_wheel_title">Steering-wheel button</string>
     <string name="setup_wheel_body">Start and stop the assistant with the mic button on the steering wheel, without touching the screen.</string>
     <string name="setup_wheel_on">On. The mic button on the wheel starts and stops listening.</string>

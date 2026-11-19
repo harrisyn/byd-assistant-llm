@@ -112,39 +112,20 @@ internal fun AssistantPane(viewModel: SettingsViewModel) {
     if (showLlm) {
         LlmProviderDialog(
             initial = llmConfig,
+            geminiKeySaved = hasApiKey && llmConfig.isGemini,
             onSave = { c, k, sk, tk -> viewModel.saveLlm(c, k, sk, tk) },
             onLoadModels = { b, k -> viewModel.loadModels(b, k) },
             onDismiss = { showLlm = false },
-        )
-    }
-    if (showApiKey) {
-        ApiKeyDialog(
-            hasKey = hasApiKey,
-            message = apiKeyMessage,
-            onSave = { viewModel.updateApiKey(it) },
-            onClear = { viewModel.clearApiKey() },
-            onDismiss = { showApiKey = false },
         )
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
         SettingsSection(stringResource(R.string.group_setup)) {
             row {
-                SettingRow(
-                    title = "AI model",
-                    subtitle = if (llmConfig.isGemini) "Gemini (Live audio)" else "${llmConfig.model} @ ${llmConfig.baseUrl}",
-                    onClick = { showLlm = true },
-                    trailing = { SettingButton(label = stringResource(R.string.action_change), primary = false, onClick = { showLlm = true }) },
-                )
-            }
-            row {
-                val open = {
-                    viewModel.clearApiKeyMessage()
-                    showApiKey = true
-                }
+                val open = { showLlm = true }
                 SettingRow(
                     title = stringResource(R.string.api_key_title),
-                    subtitle = stringResource(if (hasApiKey) R.string.api_key_saved else R.string.api_key_none),
+                    subtitle = if (llmConfig.isGemini) "Gemini (Live audio)" else "${llmConfig.model} — ${com.bydassistantng.llm.LlmPresets.byId(llmConfig.preset).label}",
                     onClick = open,
                     trailing = {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {

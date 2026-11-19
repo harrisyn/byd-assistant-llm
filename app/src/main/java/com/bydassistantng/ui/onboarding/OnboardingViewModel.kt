@@ -56,33 +56,33 @@ class OnboardingViewModel @Inject constructor(
 
     suspend fun loadModels(base: String, key: String): List<String> = llmConfigRepository.listModels(base, key)
 
+    private val _configured = MutableStateFlow(false)
+
+    /** Whether an AI model is chosen and has the key it needs. */
+    val configured: StateFlow<Boolean> = _configured.asStateFlow()
+
+    init {
+        viewModelScope.launch { _configured.value = secureCredentials.hasApiKey() }
+    }
+
     fun saveLlm(config: com.bydassistantng.llm.LlmConfig, llmKey: String, sttKey: String, ttsKey: String) {
         viewModelScope.launch {
             llmConfigRepository.save(config)
-            if (llmKey.isNotBlank()) llmConfigRepository.setLlmKey(llmKey)
-            if (sttKey.isNotBlank()) llmConfigRepository.setSttKey(sttKey)
-            if (ttsKey.isNotBlank()) llmConfigRepository.setTtsKey(ttsKey)
+            if (config.isGemini) {
+                if (llmKey.isNotBlank()) secureCredentials.setApiKey(llmKey.trim())
+            } else {
+                if (llmKey.isNotBlank()) llmConfigRepository.setLlmKey(llmKey)
+                if (sttKey.isNotBlank()) llmConfigRepository.setSttKey(sttKey)
+                if (ttsKey.isNotBlank()) llmConfigRepository.setTtsKey(ttsKey)
+            }
+            _configured.value = secureCredentials.hasApiKey()
         }
     }
 
-    fun saveApiKeyAndFinish(apiKey: String, onFinished: () -> Unit) {
-        // Another model chosen: no Gemini key is needed to finish.
-        if (!llmConfig.value.isGemini) {
-            viewModelScope.launch {
-                if (apiKey.isNotBlank()) secureCredentials.setApiKey(apiKey.trim())
-                preferencesRepository.setOnboardingCompleted(true)
-                onFinished()
-            }
-            return
-        }
-        if (apiKey.isBlank()) {
-            _errorMessage.value = AppLanguage.string(context, R.string.onb_enter_key)
-            return
-        }
+    fun finish(onFinished: () -> Unit) {
         viewModelScope.launch {
-            val saved = secureCredentials.setApiKey(apiKey.trim())
-            if (!saved) {
-                _errorMessage.value = AppLanguage.string(context, R.string.api_save_failed)
+            if (!secureCredentials.hasApiKey()) {
+                _errorMessage.value = AppLanguage.string(context, R.string.onb_enter_key)
                 return@launch
             }
             preferencesRepository.setOnboardingCompleted(true)

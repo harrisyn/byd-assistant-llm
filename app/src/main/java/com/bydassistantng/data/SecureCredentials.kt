@@ -118,7 +118,18 @@ class SecureCredentials @Inject constructor(@ApplicationContext context: Context
         false
     }
 
-    suspend fun hasApiKey(): Boolean = !getApiKey().isNullOrBlank()
+    /**
+     * Whether the assistant has what it needs to answer: a Gemini key, or - when another AI model is chosen - that
+     * provider's key (none needed for a local server such as Ollama).
+     */
+    suspend fun hasApiKey(): Boolean {
+        val prefs = dataStore.data.first()
+        if (prefs[stringPreferencesKey("llm_provider")] == "OPENAI_COMPAT") {
+            val preset = com.bydassistantng.llm.LlmPresets.byId(prefs[stringPreferencesKey("llm_preset")] ?: "custom")
+            return !preset.needsKey || !getSecret("llm").isNullOrBlank()
+        }
+        return !getApiKey().isNullOrBlank()
+    }
 
     suspend fun clearApiKey() {
         dataStore.edit {
